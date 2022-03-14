@@ -387,3 +387,103 @@ document.querySelector('.login-form').addEventListener('submit', loginFormHandle
 --.
 
 The main difference here is that after you login it kicks you back out to the homepage, which of course the module didn't realize so that's fun. To make the work match the module I had to bring down the if(response.ok) from the submit form to test it out there way.
+
+# 14.2.5
+
+We installed express session and connect session sequalize for the first time. Then we went into the root server.js
+
+## and added this code to allow the new packages
+
+const session = require('express-session');
+
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
+
+const sess = {
+secret: 'Super secret secret',
+cookie: {},
+resave: false,
+saveUninitialized: true,
+store: new SequelizeStore({
+db: sequelize
+})
+};
+
+app.use(session(sess));
+--.
+
+Then we went into controllers/api/user-routes.js changed the .then
+
+## in the router.post("/") to look like this
+
+router.post("/", (req, res) => {
+// expects {username: 'Lernantino', email: 'lernantino@gmail.com', password: 'password1234'}
+User.create({
+username: req.body.username,
+email: req.body.email,
+password: req.body.password,
+})
+.then((dbUserData) => {
+req.session.save(() => {
+req.session.user_id = dbUserData.id;
+req.session.username = dbUserData.username;
+req.session.loggedIn = true;
+
+        res.json(dbUserData);
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
+
+});
+--.
+
+The req.session stuff is what actually logs you in be creating a personal session tied to your user id. Then we did the same thing for user login in the user-routes .js file.
+
+## The code looked like this
+
+router.post("/login", (req, res) => {
+User.findOne({
+where: {
+email: req.body.email,
+},
+}).then((dbUserData) => {
+if (!dbUserData) {
+res.status(400).json({ message: "No user with that email address!" });
+return;
+}
+
+    const validPassword = dbUserData.checkPassword(req.body.password);
+
+    if (!validPassword) {
+      res.status(400).json({ message: "Incorrect password!" });
+      return;
+    }
+
+    req.session.save(() => {
+      // declare session variables
+      req.session.user_id = dbUserData.id;
+      req.session.username = dbUserData.username;
+      req.session.loggedIn = true;
+
+      res.json({ user: dbUserData, message: "You are now logged in!" });
+    });
+
+});
+});
+--.
+
+Again making it so when you login you create a session to give the user experience of being logged into a site. You can aslo go into the dev tools to get the session name by clicking application and navigating to the cookies folder. Finally we added a bit of code to the the controller/hone-routes.js that will atomiatically return you to the home page everytime you click on log in if you are already logged in.
+
+## home page log in reroute
+
+router.get("/login", (req, res) => {
+if (req.session.loggedIn) {
+res.redirect("/");
+return;
+}
+
+res.render("login");
+});
+--.

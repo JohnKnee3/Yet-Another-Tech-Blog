@@ -279,3 +279,111 @@ res.render("login");
 --.
 
 which will link us out to the login.handlebars page. The code is much cleaner than our loading homepage because we are not pulling anything from the database to display this page.
+
+# 14.2.4
+
+We set up the front end javascript to handle the login and sign up forms. Once it is all said in done when you sign up you will get added to the database and once you log in you will get redirected to the main page. The very first thing we did was we went into the public folder and made a nested javacript folder. Then we added a login.js file. Afterwards we slid into the login.handlebars html and
+
+## included the path to the javascript file the html will be using at the very bottom of the file
+
+<script src="/javascript/login.js"></script>
+
+--.
+
+Then we went back into the newly created login.js file and added
+
+## this code to listen to the sign up form
+
+function signupFormHandler(event) {
+event.preventDefault();
+
+const username = document.querySelector('#username-signup').value.trim();
+const email = document.querySelector('#email-signup').value.trim();
+const password = document.querySelector('#password-signup').value.trim();
+
+if (username && email && password) {
+fetch('/api/users', {
+method: 'post',
+body: JSON.stringify({
+username,
+email,
+password
+}),
+headers: { 'Content-Type': 'application/json' }
+}).then((response) => {console.log(response)})
+}
+}
+
+querySelector('.signup-form').addEventListener('submit', signupFormHandler);
+--.
+
+This worked well and added the user to the database without issue which was easy to verify in insomnia. But the they got all ES6 happy and wanted
+
+## us to code it like this
+
+async function signupFormHandler(event) {
+event.preventDefault();
+
+const username = document.querySelector("#username-signup").value.trim();
+const email = document.querySelector("#email-signup").value.trim();
+const password = document.querySelector("#password-signup").value.trim();
+
+if (username && email && password) {
+const response = await fetch("/api/users", {
+method: "post",
+body: JSON.stringify({
+username,
+email,
+password,
+}),
+headers: { "Content-Type": "application/json" },
+});
+
+    // check the response status
+    if (response.ok) {
+      console.log("success");
+    } else {
+      alert(response.statusText);
+    }
+
+}
+}
+
+document
+.querySelector(".login-form")
+.addEventListener("submit", loginFormHandler);
+--.
+
+To avoid having to use .then and .catch and what not. Finally we added all the info for the
+
+## log in form that looked like this
+
+async function loginFormHandler(event) {
+event.preventDefault();
+
+const email = document.querySelector('#email-login').value.trim();
+const password = document.querySelector('#password-login').value.trim();
+
+if (email && password) {
+const response = await fetch('/api/users/login', {
+method: 'post',
+body: JSON.stringify({
+email,
+password
+}),
+headers: { 'Content-Type': 'application/json' }
+});
+
+    if (response.ok) {
+      document.location.replace('/');
+    } else {
+      alert(response.statusText);
+    }
+
+}
+}
+
+document.querySelector('.login-form').addEventListener('submit', loginFormHandler);
+--.
+
+The main difference here is that after you login it kicks you back out to the homepage, which of course the module didn't realize so that's fun. To make the work match the module I had to bring down the if(response.ok) from the submit form to test it out there way.

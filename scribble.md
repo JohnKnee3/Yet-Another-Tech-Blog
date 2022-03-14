@@ -108,3 +108,109 @@ This is essentially a fake get that will send this data into the html to be usea
 --.
 
 Which takes the above data and plugs it into the html using {{}} to hold the object names. Simply launching localhot:3001 will look at all of this in it's HTML format.
+
+# 14.1.6
+
+We went into home-routes.js and set it up to pull from the database instead of being hardcoded.
+
+## It looked like this at first
+
+router.get('/', (req, res) => {
+Post.findAll({
+attributes: [
+'id',
+'post_url',
+'title',
+'created_at',
+[sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
+],
+include: [
+{
+model: Comment,
+attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+include: {
+model: User,
+attributes: ['username']
+}
+},
+{
+model: User,
+attributes: ['username']
+}
+]
+})
+.then(dbPostData => {
+// pass a single post object into the homepage template
+res.render('homepage', dbPostData[0]);
+})
+.catch(err => {
+console.log(err);
+res.status(500).json(err);
+});
+});
+--.
+
+We hardcoded the 0 to show the first spot. The only real issue here is the data came to us in a huge sequelize object that didn't really work with what we had.
+
+## To make it work we added this
+
+res.render('homepage', dbPostData[0].get({ plain: true }));
+--.
+
+This does something called serialize which just parses over the data and gives us only the info we want.
+
+## Finally in this same file of home-routes.js we changed it to this
+
+const posts = dbPostData.map(post => post.get({ plain: true }));
+
+res.render('homepage', { posts });
+--.
+
+So we will map over the entire array. Unfortunately this busted homepage.handlebars and we had to add {{#each posts}} and {{/each}}
+to make the array work.
+
+## This looked something like this
+
+<ol class="post-list">
+  {{#each posts}}
+  <li>
+    <article class="post">
+      <div class="title">
+        <a href="{{post_url}}" target="_blank">{{title}}</a>
+        <span>({{post_url}})</span>
+      </div>
+      <div class="meta">
+        {{vote_count}} point(s) by {{user.username}} on
+        {{created_at}}
+        |
+        <a href="/post/{{id}}">{{comments.length}} comment(s)</a>
+      </div>
+    </article>
+  </li>
+  {{/each}}
+</ol>
+--.
+
+Finally for what appears to be for nothing more than coding legibility we changed the each up top to {{#each posts as |post|}} so the code will show the word post everywhere so people will be less confused.
+
+## The end result looked like this
+
+<ol class="post-list">
+  {{#each posts as |post|}}
+  <li>
+    <article class="post">
+      <div class="title">
+        <a href="{{post.post_url}}" target="_blank">{{post.title}}</a>
+        <span>({{post.post_url}})</span>
+      </div>
+      <div class="meta">
+        {{post.vote_count}} point(s) by {{post.user.username}} on
+        {{post.created_at}}
+        |
+        <a href="/post/{{post.id}}">{{post.comments.length}} comment(s)</a>
+      </div>
+    </article>
+  </li>
+  {{/each}}
+</ol>
+--.

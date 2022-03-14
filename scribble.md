@@ -214,3 +214,68 @@ Finally for what appears to be for nothing more than coding legibility we change
   {{/each}}
 </ol>
 --.
+
+# 14.2.3
+
+We set up the login page. First we went into the main.handelbars and
+
+added a login button to the header like this
+--.
+
+<header>
+        <h1>
+          <a href="/">Just Tech News</a>
+        </h1>
+        <nav>
+          <a href="/login">login</a>
+        </nav>
+      </header>
+--.
+
+Then we went into the views folder and created a new file called login.handlebars and added the html code that will display the
+
+## login forms like this
+
+<form class="login-form">
+  <div>
+    <label for="email-login">email:</label>
+    <input type="text" id="email-login" />
+  </div>
+  <div>
+    <label for="password-login">password:</label>
+    <input type="password" id="password-login" />
+  </div>
+  <div>
+    <button type="submit">login</button>
+  </div>
+</form>
+
+<form class="signup-form">
+  <div>
+    <label for="username-signup">username:</label>
+    <input type="text" id="username-signup" />
+  </div>
+  <div>
+    <label for="email-signup">email:</label>
+    <input type="text" id="email-signup" />
+  </div>
+  <div>
+    <label for="password-signup">password:</label>
+    <input type="password" id="password-signup" />
+  </div>
+  <div>
+    <button type="submit">signup</button>
+  </div>
+</form>
+--.
+
+Finally we linked it so when clicked we will be taken to this page by going into the cotrollers folder in the home-routes.js file and
+
+## added this code
+
+router.get("/login", (req, res) => {
+res.render("login");
+});
+--.
+
+which will link us out to the login.handlebars page. The code is much cleaner than our loading homepage because we are not pulling anything from the database to display this page.

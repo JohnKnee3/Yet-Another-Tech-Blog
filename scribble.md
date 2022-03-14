@@ -63,3 +63,48 @@ const homeRoutes = require('./home-routes.js');
 
 router.use('/', homeRoutes);
 --.
+
+# 14.1.5
+
+we went into home-routes.js
+
+## and added this
+
+router.get('/', (req, res) => {
+res.render('homepage', {
+id: 1,
+post_url: 'https://handlebarsjs.com/guide/',
+title: 'Handlebars Docs',
+created_at: new Date(),
+vote_count: 10,
+comments: [{}, {}],
+user: {
+username: 'test_user'
+}
+});
+});
+--.
+
+This is essentially a fake get that will send this data into the html to be useable.
+
+## in homepage.handlebars we added this
+
+<ol class="post-list">
+  <li>
+    <article class="post">
+      <div class="title">
+        <a href="{{post_url}}" target="_blank">{{title}}</a>
+        <span>({{post_url}})</span>
+      </div>
+      <div class="meta">
+        {{vote_count}} point(s) by {{user.username}} on
+        {{created_at}}
+        |
+        <a href="/post/{{id}}">{{comments.length}} comment(s)</a>
+      </div>
+    </article>
+  </li>
+</ol>
+--.
+
+Which takes the above data and plugs it into the html using {{}} to hold the object names. Simply launching localhot:3001 will look at all of this in it's HTML format.

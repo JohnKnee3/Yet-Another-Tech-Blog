@@ -487,3 +487,53 @@ return;
 res.render("login");
 });
 --.
+
+# 14.2.6
+
+created a log out file and button to terminate the session. First we went into controller/api/user-route.js and added a new route to
+
+## log us out from the session.
+
+router.post("/logout", (req, res) => {
+if (req.session.loggedIn) {
+req.session.destroy(() => {
+res.status(204).end();
+});
+} else {
+res.status(404).end();
+}
+});
+--.
+
+Then we added a logout button to the html in the main.handlebars just above the log in button
+
+## like this
+
+<nav>
+          <button id="logout" class="btn-no-style">logout</button>
+          <a href="/login">login</a>
+        </nav>
+--.
+
+Finally we added t link just above the closing body in out main.handlebars to link to.....
+
+Then we made a file in public/javascript/logout.js
+
+## where we added
+
+async function logout() {
+const response = await fetch("/api/users/logout", {
+method: "post",
+headers: { "Content-Type": "application/json" },
+});
+
+if (response.ok) {
+document.location.replace("/");
+} else {
+alert(response.statusText);
+}
+}
+
+document.querySelector("#logout").addEventListener("click", logout);
+--.
+This hot hot ES6 syntax to log us out by fetching the route we just made.

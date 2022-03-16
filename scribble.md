@@ -1040,3 +1040,35 @@ return `${word}s`;
 --.
 
 We ran that and passed it and are moving right along.
+
+# 14.4.7
+
+Added a test that trims down the URL. First we added the test to
+
+## helpers.test.js that looks like this
+
+test("format_url() returns a simplified url string", () => {
+const url1 = format_url("http://test.com/page/1");
+const url2 = format_url("https://www.coolstuff.com/abcdefg/");
+const url3 = format_url("https://www.google.com?q=hello");
+
+expect(url1).toBe("test.com");
+expect(url2).toBe("coolstuff.com");
+expect(url3).toBe("google.com");
+});
+--.
+
+Then we went back into the helper.js and chained
+
+## several functions to remove text from the URL
+
+format_url: url => {
+return url
+.replace('http://', '')
+.replace('https://', '')
+.replace('www.', '')
+.split('/')[0]
+.split('?')[0];
+},
+--.
+From top to bottom we replace http with an empty string. We replace https with an empty string. We replace www. with an empty string. We cut everything on the / and then only grab the very first thing in the array. Then we cut everything on the ? and only grab the first thing out of the array.

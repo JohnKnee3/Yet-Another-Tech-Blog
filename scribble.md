@@ -840,3 +840,54 @@ Finally we were getting a little error where it single-post.handlebars was tryin
 --.
 
 Which cleaned up our console errors.
+
+# 14.3.7
+
+We finally fixed the logout button. They never realized that they had us delete it in the zip squish. But either way we went into the main.handlebars and created our first ever if else to show the logout button if logged in otherwise show the log out button
+
+## This looked like this
+
+<header>
+        <h1>
+          <a href="/">Just Tech News</a>
+        </h1>
+        <nav>
+          {{#if loggedIn}}
+            <button id="logout" class="btn-no-style">logout</button>
+          {{else}}
+            <a href="/login">login</a>
+          {{/if}}
+        </nav>
+      </header>
+--.
+
+Then we finally brought the reference the the logout button back and where told to
+
+## give it an #if
+
+{{#if loggedIn}}
+<script src="/javascript/logout.js"></script>
+{{/if}}
+--.
+
+Finally went into the get (/) for the home-routes.js and amde sure that this also checked for login
+
+## with this code
+
+.then((dbPostData) => {
+const posts = dbPostData.map((post) => post.get({ plain: true }));
+
+      res.render("homepage", {
+        posts,
+        loggedIn: req.session.loggedIn,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
+
+});
+--.
+
+The page now seems to be working as intended with everything in properly.

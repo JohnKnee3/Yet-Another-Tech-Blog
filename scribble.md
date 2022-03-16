@@ -977,3 +977,31 @@ To the spot where we removed it. Yet again we needed to fix an issue up top in t
 --.
 
 Basically since we are passing in an unnamed array we had to use the "this" keyword to reference the array each time we loop over it.
+
+# 14.4.5
+
+We set up a **test** folder and added a herlper.test.js file to it. Then we set up a utils folder and added the helper.js file to it.
+
+## In the test we added this
+
+const { format_date } = require("../utils/helpers");
+
+test("format_date() returns a date string", () => {
+const date = new Date("2020-03-20 16:12:03");
+
+expect(format_date(date)).toBe("3/20/2020");
+});
+--.
+
+Which failed because we didn't had the code yet to return the date back in the proper format. To do that we slid back into the newly created
+
+## helper.js file and added this
+
+module.exports = {
+format_date: (date) => {
+return `${new Date(date).getMonth() + 1}/${new Date( date ).getDate()}/${new Date(date).getFullYear()}`;
+},
+};
+--.
+
+This is some code that goes through and uses built in javascript Date object and formats it to give the test the date in the order it wants. This passes and we are good to go.

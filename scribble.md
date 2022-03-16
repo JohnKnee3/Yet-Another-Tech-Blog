@@ -926,3 +926,54 @@ Then in the hompage and single-post.handlerbars where we removed the articles
 {{> post-info post }}
 --.
 As you can see here the first bit references the page and the second renames it post. Also to console.log in handlebars simply type {{log this}} with this being whatever it is you are trying to log.
+
+# 14.4.4
+
+We did the same thing but got juked this time because we are dealing with an array. First we went back into the newly created views/partials folder and created a new comments.handlebars.
+
+## In this we cut this
+
+  <div class="comments">
+  {{#each post.comments}}
+    <section class="comment">
+      <div class="meta">
+        {{user.username}}
+        on
+        {{created_at}}
+      </div>
+      <div class="text">
+        {{comment_text}}
+      </div>
+    </section>
+  {{/each}}
+</div>
+--.
+
+From the single-post.handlebars and
+
+## then added
+
+{{> comments post.comments }}
+--.
+
+To the spot where we removed it. Yet again we needed to fix an issue up top in the comments.handlebars. This time instead of being able to simply remove post. from everything, if you notice there isn't a .post anywhere here which should of been the first clue, we had to change the line up top that conatined the #each.
+
+## The end result looked like this
+
+<div class="comments">
+  {{#each this}}
+    <section class="comment">
+      <div class="meta">
+        {{user.username}}
+        on
+        {{created_at}}
+      </div>
+      <div class="text">
+        {{comment_text}}
+      </div>
+    </section>
+  {{/each}}
+</div>
+--.
+
+Basically since we are passing in an unnamed array we had to use the "this" keyword to reference the array each time we loop over it.

@@ -1072,3 +1072,57 @@ return url
 },
 --.
 From top to bottom we replace http with an empty string. We replace https with an empty string. We replace www. with an empty string. We cut everything on the / and then only grab the very first thing in the array. Then we cut everything on the ? and only grab the first thing out of the array.
+
+# 14.4.8
+
+We added all the pluralization helpers to the code for points and comments.
+
+## First we went into server.js and added
+
+const helpers = require('./utils/helpers');
+&
+const hbs = exphbs.create({ helpers });
+--.
+The helpers was simply placed within the existing curly braces. Then we went into comments.handlebars partial and simply added format_date to
+
+## call the function like this
+
+<section class="comment">
+      <div class="meta">
+        {{user.username}}
+        on
+        {{format_date created_at}}
+      </div>
+      <div class="text">
+        {{comment_text}}
+      </div>
+    </section>
+  {{/each}}
+--.
+
+We also went to any spot we could find created at and put a forma_date in front of it like in post-info. Then we jumped in front of any
+post_url and added format_url like this
+--
+
+<div class="title">
+    <a href="{{post_url}}" target="_blank">{{title}}</a>
+    <span>({{format_url post_url}})</span>
+  </div>
+--.
+
+Finally we changed every point(s) and comment(s) to have it's own object that uses format_plural then passes in the string we see for exapmple "point" and then uses vote_vount or comments.length to get a number. If that number is greater than 1 it adds an "s" to the end of the passed in string.
+
+## here are both examples
+
+<div class="meta">
+    {{vote_count}}
+    {{format_plural "point" vote_count}}
+    by
+    {{user.username}}
+    on
+    {{format_date created_at}}
+    |
+    <a href="/post/{{id}}">{{comments.length}}
+      {{format_plural "comment" comments.length}}</a>
+  </div>
+--.

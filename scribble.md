@@ -710,3 +710,70 @@ res.status(500).json(err);
 }
 });
 --.
+
+# 14.3.5
+
+So this time we added the ability to add comments. We added
+
+## this to the public/javascript/comment.js file
+
+async function commentFormHandler(event) {
+event.preventDefault();
+
+const comment_text = document
+.querySelector('textarea[name="comment-body"]')
+.value.trim();
+
+const post_id = window.location.toString().split("/")[
+window.location.toString().split("/").length - 1
+];
+
+if (comment_text) {
+const response = await fetch("/api/comments", {
+method: "POST",
+body: JSON.stringify({
+post_id,
+comment_text,
+}),
+headers: {
+"Content-Type": "application/json",
+},
+});
+
+    if (response.ok) {
+      document.location.reload();
+    } else {
+      alert(response.statusText);
+    }
+
+}
+}
+
+document
+.querySelector(".comment-form")
+.addEventListener("submit", commentFormHandler);
+--.
+
+Which will go in and a comment using the post route in the comment-routes.js. Then we went into that file and updated the route to include the if(req.session)
+
+## that looks like this
+
+router.post("/", (req, res) => {
+// check the session
+if (req.session) {
+Comment.create({
+comment_text: req.body.comment_text,
+post_id: req.body.post_id,
+// use the id from the session
+user_id: req.session.user_id,
+})
+.then((dbCommentData) => res.json(dbCommentData))
+.catch((err) => {
+console.log(err);
+res.status(400).json(err);
+});
+}
+});
+--.
+
+The only issue is that this does not function as intended. The module assumes with this if statement it will throw up an error if you are not logged in. But in fact it accepts null. In order to fix this I went into the model folder and found comment.js's user_id and added allow_null: false. Once I tested that is threw up an error that I was expecting. Then when you login it adds. I have since cleared it hoping the module will show us a way around this.

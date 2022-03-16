@@ -537,3 +537,108 @@ alert(response.statusText);
 document.querySelector("#logout").addEventListener("click", logout);
 --.
 This hot hot ES6 syntax to log us out by fetching the route we just made.
+
+# 14.3.3
+
+We added a new page called single-post.handlebars to show the page when a user clicks on one post.
+
+## Then in this file we added this
+
+<article class="post">
+  <div class="title">
+    <a href="{{post.post_url}}" target="_blank">{{post.title}}</a>
+    <span>({{post.post_url}})</span>
+  </div>
+  <div class="meta">
+    {{post.vote_count}}
+    point(s) by
+    {{post.user.username}}
+    on
+    {{post.created_at}}
+    |
+    <a href="/post/{{post.id}}">{{post.comments.length}} comment(s)</a>
+  </div>
+</article>
+
+<form class="comment-form">
+  <div>
+    <textarea name="comment-body"></textarea>
+  </div>
+
+  <div>
+    <button type="submit">add comment</button>
+    <button type="button" class="upvote-btn">upvote</button>
+  </div>
+</form>
+
+<div class="comments">
+  {{#each post.comments}}
+    <section class="comment">
+      <div class="meta">
+        {{user.username}}
+        on
+        {{created_at}}
+      </div>
+      <div class="text">
+        {{comment_text}}
+      </div>
+    </section>
+  {{/each}}
+</div>
+--.
+
+The top bit makes a link that is named after the title and displays the URL text next to it. Then we go down and display more stuff that matched in ways that makes sense. Once we get to the comment section we make a text area and attach 2 buttons to it that do not have functionality just yet.
+
+Finally we revisit the #each to pull out all of the comments and display them as shown.
+
+In home-routes.js we had to set up the backend to actually get all the data for what was just mentioned.
+
+## It looks like this
+
+router.get("/post/:id", (req, res) => {
+Post.findOne({
+where: {
+id: req.params.id,
+},
+attributes: [
+"id",
+"post_url",
+"title",
+"created_at",
+[
+sequelize.literal(
+"(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)"
+),
+"vote_count",
+],
+],
+include: [
+{
+model: Comment,
+attributes: ["id", "comment_text", "post_id", "user_id", "created_at"],
+include: {
+model: User,
+attributes: ["username"],
+},
+},
+{
+model: User,
+attributes: ["username"],
+},
+],
+})
+.then((dbPostData) => {
+if (!dbPostData) {
+res.status(404).json({ message: "No post found with this id" });
+return;
+}
+--.
+
+This is fairly straightforward referencing multiple tables from the post table to get all the needed data. The only part where they juked me was when they revealed that at some point in the hompage.handlebars we added a href link to kick us out to this new page.
+
+## That link looked like this
+
+<a href="/post/{{post.id}}">{{post.comments.length}} comment(s)</a>
+--.
+
+Basically saying when you click on the word comments it will shot us here by grabbing it's id.

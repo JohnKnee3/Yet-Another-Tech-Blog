@@ -1,3 +1,5 @@
+mysql -u root -p
+
 # 14.1.3
 
 We are using the same module from last week and building on it. The first thing we did was add a public folder with a nested stylesheet folder. Inside of that we added a copy and pasted style sheet then
@@ -866,7 +868,9 @@ Then we finally brought the reference the the logout button back and where told 
 ## give it an #if
 
 {{#if loggedIn}}
+
 <script src="/javascript/logout.js"></script>
+
 {{/if}}
 --.
 
@@ -891,3 +895,34 @@ const posts = dbPostData.map((post) => post.get({ plain: true }));
 --.
 
 The page now seems to be working as intended with everything in properly.
+
+# 14.4.3
+
+Created the first partial. We made a folder in the root of views along side the layouts folder. Inside it we created the pot-info.handlebars file that then we cut out the article section from the hompage and single-post handlebars since they are identical code. We also removed post. in front of every variable because this file does now know what the post object is yet.
+
+## This is what we moved into post-info.handlerbars
+
+<article class="post">
+  <div class="title">
+    <a href="{{post_url}}" target="_blank">{{title}}</a>
+    <span>({{post_url}})</span>
+  </div>
+  <div class="meta">
+    {{vote_count}}
+    point(s) by
+    {{user.username}}
+    on
+    {{created_at}}
+    |
+    <a href="/post/{{id}}">{{comments.length}} comment(s)</a>
+  </div>
+</article>
+--.
+
+Then in the hompage and single-post.handlerbars where we removed the articles
+
+## we added this
+
+{{> post-info post }}
+--.
+As you can see here the first bit references the page and the second renames it post. Also to console.log in handlebars simply type {{log this}} with this being whatever it is you are trying to log.

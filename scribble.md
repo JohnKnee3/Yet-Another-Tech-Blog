@@ -1005,3 +1005,38 @@ return `${new Date(date).getMonth() + 1}/${new Date( date ).getDate()}/${new Dat
 --.
 
 This is some code that goes through and uses built in javascript Date object and formats it to give the test the date in the order it wants. This passes and we are good to go.
+
+# 14.4.6
+
+We set up a test to check for plurals in the
+
+## file helpers.test.js it looks like this
+
+const { format_date, format_plural } = require("../utils/helpers");
+
+test("format_plural() returns a pluralized word", () => {
+const word1 = format_plural("tiger", 1);
+const word2 = format_plural("lion", 2);
+
+expect(word1).toBe("tiger");
+expect(word2).toBe("lions");
+});
+
+existing code
+--.
+
+Then we failed it and added
+
+## this to herlpers.js
+
+format_plural: (word, amount) => {
+if (amount !== 1) {
+return `${word}s`;
+}
+
+    return word;
+
+},
+--.
+
+We ran that and passed it and are moving right along.

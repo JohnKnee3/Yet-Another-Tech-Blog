@@ -777,3 +777,66 @@ res.status(400).json(err);
 --.
 
 The only issue is that this does not function as intended. The module assumes with this if statement it will throw up an error if you are not logged in. But in fact it accepts null. In order to fix this I went into the model folder and found comment.js's user_id and added allow_null: false. Once I tested that is threw up an error that I was expecting. Then when you login it adds. I have since cleared it hoping the module will show us a way around this.
+
+# 14.3.6
+
+Added {{#if loggedIn}} {{/if}} statements to only display certain HTML if the user in logged in.
+
+## Here is an example of us hiding the comment box, submit button and the upvote button
+
+{{#if loggedIn}}
+
+  <form class="comment-form">
+    <div>
+      <textarea name="comment-body"></textarea>
+    </div>
+
+    <div>
+      <button type="submit">add comment</button>
+      <button type="button" class="upvote-btn">upvote</button>
+    </div>
+
+  </form>
+{{/if}}
+--.
+
+This was done in the single-post.handlebars. We also updated the
+
+## single-post at the /post/:id by adding loggedIn: req.session.loggedIn
+
+.then((dbPostData) => {
+if (!dbPostData) {
+res.status(404).json({ message: "No post found with this id" });
+return;
+}
+
+      // serialize the data
+      const post = dbPostData.get({ plain: true });
+
+      // pass data to template
+      res.render("single-post", {
+        post,
+        loggedIn: req.session.loggedIn,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
+
+});
+--.
+
+Finally we were getting a little error where it single-post.handlebars was trying to load the front end JS even if the user wasn't logged in. To fix this we added another if statement where we
+
+## load the front in JS
+
+{{#if loggedIn}}
+
+  <script src="/javascript/comment.js"></script>
+  <script src="/javascript/upvote.js"></script>
+
+{{/if}}
+--.
+
+Which cleaned up our console errors.

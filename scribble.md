@@ -642,3 +642,71 @@ This is fairly straightforward referencing multiple tables from the post table t
 --.
 
 Basically saying when you click on the word comments it will shot us here by grabbing it's id.
+
+# 14.3.4
+
+We made the files for the front end js called comment.js and upvote.js. Then we went into the single-post.handlebars and added
+
+## the javascript links like this
+
+<script src="/javascript/comment.js"></script>
+<script src="/javascript/upvote.js"></script>
+
+--.
+
+Then we went into the newly created upvote.js and added code to make sure that it uses our created PUT route called api/posts/upvote in the post-routes.js folder.
+
+## That looks like this
+
+async function upvoteClickHandler(event) {
+event.preventDefault();
+
+const id = window.location.toString().split("/")[
+window.location.toString().split("/").length - 1
+];
+
+console.log(id);
+console.log("button clicked");
+
+const response = await fetch("/api/posts/upvote", {
+method: "PUT",
+body: JSON.stringify({
+post_id: id,
+}),
+headers: {
+"Content-Type": "application/json",
+},
+});
+
+if (response.ok) {
+document.location.reload();
+} else {
+alert(response.statusText);
+}
+}
+
+document
+.querySelector(".upvote-btn")
+.addEventListener("click", upvoteClickHandler);
+--.
+
+Finally we went into the post-routes.js to make sure it knows to check if you are logged in before you have permission to upvote
+
+## with if (req.session)
+
+router.put("/upvote", (req, res) => {
+// make sure the session exists first
+if (req.session) {
+// pass session id along with all destructured properties on req.body
+Post.upvote(
+{ ...req.body, user_id: req.session.user_id },
+{ Vote, Comment, User }
+)
+.then((updatedVoteData) => res.json(updatedVoteData))
+.catch((err) => {
+console.log(err);
+res.status(500).json(err);
+});
+}
+});
+--.

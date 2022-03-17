@@ -1353,3 +1353,108 @@ res.status(500).json(err);
 --.
 
 There are several other examples throughout the code in comment.routes.js and dahboard-routes.js as well. I tried adding it to user-routes.js but things got a little weird when adding it to the post which makes sense. We are asking it to see if you are logged in while you are logging in which breaks it. You can however add it to log out and it works. I ultimately decided not to and cleared the require up top.
+
+# 14.5.6
+
+Added the functionality to the app to edit posts. First we went into the view folder and made the
+
+## edit-post.handlebars and put in the HTML that looked like this
+
+<article>
+  <a href="/dashboard"> &larr; Back to dashboard</a>
+  <h2>
+    Edit Post
+  </h2>
+  <form class="edit-post-form">
+    <div>
+      <input name="post-title" type="text" value="{{post.title}}" />
+      <span>({{format_url post.post_url}})</span>
+    </div>
+    <div>
+      {{post.vote_count}} {{format_plural "point" post.vote_count}} by you on {{format_date post.created_at}}
+      |
+      <a href="/post/{{post.id}}">{{post.comments.length}} {{format_plural "comment" post.comments.length}}</a>
+    </div>
+    <button type="submit">Save post</button>
+    <button type="button" class="delete-post-btn">Delete post</button>
+  </form>
+</article>
+
+<form class="comment-form">
+  <div>
+    <textarea name="comment-body"></textarea>
+  </div>
+
+  <div>
+    <button type="submit">add comment</button>
+  </div>
+</form>
+
+{{> comments post.comments}}
+
+<script src="/javascript/edit-post.js"></script>
+<script src="/javascript/delete-post.js"></script>
+<script src="/javascript/comment.js"></script>
+
+--.
+
+Here we set up the top to display several bits of info with an input section to type the new info in and 2 button options one to save changes or one to delete the enitre post. Then below that we added a spot to add a comment if you feel like and a button to save it. Below that we call the partial that will display all comments that are tied to this post. Finally we included the front end javascript links to make these html file's buttons and what not function.
+
+## Now on to the delete-post.js file
+
+async function deleteFormHandler(event) {
+event.preventDefault();
+
+const id = window.location.toString().split("/")[
+window.location.toString().split("/").length - 1
+];
+console.log(id);
+const response = await fetch(`/api/posts/${id}`, {
+method: "DELETE",
+});
+if (response.ok) {
+document.location.replace("/dashboard/");
+} else {
+alert(response.statusText);
+}
+}
+
+document
+.querySelector(".delete-post-btn")
+.addEventListener("click", deleteFormHandler);
+--.
+
+This first grabs the id from the URL up top. In the URL the id is the number at the very end of the string and we set it to a var of id. Then we create the fetch where we use `` back ticks instead of "" quotes because we are grabbing the id in the route path with ${id}. Then we make sure the method us delete so it knows to look for a delete route and once done we use the replce.(/"dashboard") to kick you back out to the dashboard when done.
+
+## Now the edit-post.js we had to do this
+
+async function editFormHandler(event) {
+event.preventDefault();
+
+const title = document.querySelector('input[name="post-title"]').value.trim();
+const id = window.location.toString().split("/")[
+window.location.toString().split("/").length - 1
+];
+const response = await fetch(`/api/posts/${id}`, {
+method: "PUT",
+body: JSON.stringify({
+title,
+}),
+headers: {
+"Content-Type": "application/json",
+},
+});
+
+if (response.ok) {
+document.location.replace("/dashboard/");
+} else {
+alert(response.statusText);
+}
+}
+
+document
+.querySelector(".edit-post-form")
+.addEventListener("submit", editFormHandler);
+--.
+
+The biggest changes here is the method we are using a PUT to look for a put route in the post-routes file and passing in a body of title which is what the route expects. But in order to do that we had to make sure that title matches the HTML using a query selector and get the new data we put into the input element and apply it to the variable title. Once that was set we had to add headers again for a reason I no longer remember though they seems to be tied to the body aspect of this put and then kicked you back out to the main dashboard page again with the replace("/dashborad/").

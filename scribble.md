@@ -1126,3 +1126,71 @@ Finally we changed every point(s) and comment(s) to have it's own object that us
       {{format_plural "comment" comments.length}}</a>
   </div>
 --.
+
+# 14.5.3
+
+We added the dashboard page to the site. First we went into views folder and
+
+## added dashborad.handlebars with this code
+
+<section>
+  <h2>Create New Post</h2>
+
+  <form class="new-post-form">
+    <div>
+      <label for="post-title">Title</label>
+      <input type="text" id="post-title" name="post-title" />
+    </div>
+    <div>
+      <label for="post-url">Link</label>
+      <input id="post-url" name="post-url" />
+    </div>
+    <button type="submit" class="btn">Create</button>
+  </form>
+</section>
+--.
+
+Then we went into controllers and gave it it's routes folder named
+
+## dashboard-routes.js and added this code
+
+const router = require('express').Router();
+const sequelize = require('../config/connection');
+const { Post, User, Comment } = require('../models');
+
+router.get('/', (req, res) => {
+res.render('dashboard', { loggedIn: true });
+});
+
+module.exports = router;
+--.
+
+Then we slid into the controller index.js and required and used the new dashboard-routes document
+
+## here is an updated look at the index.js
+
+const router = require("express").Router();
+
+const apiRoutes = require("./api/");
+const homeRoutes = require("./home-routes.js");
+const dashboardRoutes = require("./dashboard-routes.js");
+
+router.use("/", homeRoutes);
+router.use("/api", apiRoutes);
+router.use("/dashboard", dashboardRoutes);
+
+## module.exports = router;
+
+Finally we made sure to add the link to the main.handlebars and put it in the spot where we hide it if you are not logged in and show it if you are
+
+## like this
+
+<nav>
+  {{#if loggedIn}}
+  <a href="/dashboard">dashboard</a>
+  <button id="logout" class="btn-no-style">logout</button>
+  {{else}}
+  <a href="/login">login</a>
+  {{/if}}
+</nav>
+--.

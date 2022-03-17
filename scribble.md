@@ -1194,3 +1194,115 @@ Finally we made sure to add the link to the main.handlebars and put it in the sp
   {{/if}}
 </nav>
 --.
+
+# 14.5.4
+
+We added the ability to see our posts and the front end JS with the route to get the dashboard create button working. First we went back into the newly created dashboard-routes,js
+
+## and added a get.route
+
+router.get('/', (req, res) => {
+Post.findAll({
+where: {
+// use the ID from the session
+user_id: req.session.user_id
+},
+attributes: [
+'id',
+'post_url',
+'title',
+'created_at',
+[sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
+],
+include: [
+{
+model: Comment,
+attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+include: {
+model: User,
+attributes: ['username']
+}
+},
+{
+model: User,
+attributes: ['username']
+}
+]
+})
+.then(dbPostData => {
+// serialize data before passing to template
+const posts = dbPostData.map(post => post.get({ plain: true }));
+res.render('dashboard', { posts, loggedIn: true });
+})
+.catch(err => {
+console.log(err);
+res.status(500).json(err);
+});
+});
+--.
+
+This basically is a a copy paste of the find all posts from post-routes with the addition of the where statement making sure we grab everything by session id. Then we made a section in
+
+## dashboard.handlebars that looks like this
+
+{{#if posts.length}}
+
+<section>
+  <h2>Your Posts</h2>
+  <ol>
+    {{#each posts as |post|}}
+    <li>
+      {{> post-info post}}
+      <a href="/dashboard/edit/{{post.id}}" class="edit-link">Edit post</a>
+    </li>
+    {{/each}}
+  </ol>
+</section>
+{{/if}}
+
+<script src="/javascript/add-post.js"></script>
+
+--.
+
+The if statement makes sure that this only displays if the user has any posts. Then it take the data from the get and sends it into the post-info partial to populate the screen. We also added the javascript link to the front end js logic for this page that we are naming
+
+## add-post.js in the public/javascript file with code like this
+
+async function newFormHandler(event) {
+event.preventDefault();
+
+const title = document.querySelector('input[name="post-title"]').value;
+const post_url = document.querySelector('input[name="post-url"]').value;
+
+const response = await fetch(`/api/posts`, {
+method: "POST",
+body: JSON.stringify({
+title,
+post_url,
+}),
+headers: {
+"Content-Type": "application/json",
+},
+});
+
+if (response.ok) {
+document.location.replace("/dashboard");
+} else {
+alert(response.statusText);
+}
+}
+
+document
+.querySelector(".new-post-form")
+.addEventListener("submit", newFormHandler);
+--.
+This basically listens for the click of the create button and add the title and the url to the post in api/post. Then in api posts we had to make sure it also passed in an id
+
+## by making sure user_id required the session id like this
+
+Post.create({
+title: req.body.title,
+post_url: req.body.post_url,
+user_id: req.session.user_id
+})
+--.

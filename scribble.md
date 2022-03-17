@@ -1306,3 +1306,50 @@ post_url: req.body.post_url,
 user_id: req.session.user_id
 })
 --.
+
+# 14.5.5
+
+We added our first middleware that checks if you are logged in. If you are caught doing something you shouldn't be you will be redirected to the login page. First we created a file in the utils folder named
+
+## auth.js and added in this code
+
+const withAuth = (req, res, next) => {
+if (!req.session.user_id) {
+res.redirect('/login');
+} else {
+next();
+}
+};
+
+module.exports = withAuth;
+--.
+
+Here we are doing what I described above and redirecting you to the login screen if you are not logged in or sending saying everything is ok and using the next() to continue onto the next action. But first we have to define where we put it. Sop essentially what we did was consider any moment where we would want to check if you need to be logged in to have acces to this feature and squeezed in a withAuth which will call this function. But first we must require up top in any of the routes files that use withAuth so it will know what it is.
+
+## Her is an example post-routes.js using this
+
+const router = require("express").Router();
+const sequelize = require("../../config/connection");
+const { Post, User, Comment, Vote } = require("../../models");
+const withAuth = require("../../utils/auth");
+
+&
+
+router.post("/", withAuth, (req, res) => {
+// expects {title: 'Taskmaster goes public!', post_url: 'https://taskmaster.com/press', user_id: 1}
+if (req.session) {
+Post.create({
+title: req.body.title,
+post_url: req.body.post_url,
+user_id: req.session.user_id,
+})
+.then((dbPostData) => res.json(dbPostData))
+.catch((err) => {
+console.log(err);
+res.status(500).json(err);
+});
+}
+});
+--.
+
+There are several other examples throughout the code in comment.routes.js and dahboard-routes.js as well. I tried adding it to user-routes.js but things got a little weird when adding it to the post which makes sense. We are asking it to see if you are logged in while you are logging in which breaks it. You can however add it to log out and it works. I ultimately decided not to and cleared the require up top.

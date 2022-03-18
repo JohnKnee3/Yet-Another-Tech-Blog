@@ -1,4 +1,5 @@
 mysql -u root -p
+git remote -v
 
 # 14.1.3
 

@@ -21,13 +21,18 @@ router.get("/", (req, res) => {
     ],
   })
     .then((dbPostData) => {
-      // pass a single post object into the homepage template
-      res.render("homepage", dbPostData[0].get({ plain: true }));
+      const posts = dbPostData.map((post) => post.get({ plain: true }));
+
+      res.render("homepage", { posts });
     })
     .catch((err) => {
       console.log(err);
       res.status(500).json(err);
     });
+});
+
+router.get("/login", (req, res) => {
+  res.render("login");
 });
 
 module.exports = router;

@@ -13,6 +13,7 @@ router.get("/", (req, res) => {
     });
 });
 
+//finds the below information about one user
 router.get("/:id", (req, res) => {
   User.findOne({
     attributes: { exclude: ["password"] },
@@ -47,6 +48,7 @@ router.get("/:id", (req, res) => {
     });
 });
 
+//creates a user and signs you in
 router.post("/", (req, res) => {
   // expects {username: 'Lernantino', email: 'lernantino@gmail.com', password: 'password1234'}
   User.create({
@@ -55,13 +57,13 @@ router.post("/", (req, res) => {
     password: req.body.password,
   })
     .then((dbUserData) => {
-      // req.session.save(() => {
-      //   req.session.user_id = dbUserData.id;
-      //   req.session.username = dbUserData.username;
-      //   req.session.loggedIn = true;
+      req.session.save(() => {
+        req.session.user_id = dbUserData.id;
+        req.session.username = dbUserData.username;
+        req.session.loggedIn = true;
 
-      res.json(dbUserData);
-      // });
+        res.json(dbUserData);
+      });
     })
     .catch((err) => {
       console.log(err);
@@ -69,6 +71,7 @@ router.post("/", (req, res) => {
     });
 });
 
+//logs in the user
 router.post("/login", (req, res) => {
   // expects {email: 'lernantino@gmail.com', password: 'password1234'}
   User.findOne({
@@ -88,16 +91,17 @@ router.post("/login", (req, res) => {
       return;
     }
 
-    // req.session.save(() => {
-    //   req.session.user_id = dbUserData.id;
-    //   req.session.username = dbUserData.username;
-    //   req.session.loggedIn = true;
+    req.session.save(() => {
+      req.session.user_id = dbUserData.id;
+      req.session.username = dbUserData.username;
+      req.session.loggedIn = true;
 
-    res.json({ user: dbUserData, message: "You are now logged in!" });
-    // });
+      res.json({ user: dbUserData, message: "You are now logged in!" });
+    });
   });
 });
 
+//log out the user
 router.post("/logout", (req, res) => {
   if (req.session.loggedIn) {
     req.session.destroy(() => {
@@ -108,9 +112,8 @@ router.post("/logout", (req, res) => {
   }
 });
 
+//updates information about a user
 router.put("/:id", (req, res) => {
-  // expects {username: 'Lernantino', email: 'lernantino@gmail.com', password: 'password1234'}
-
   // pass in req.body instead to only update what's passed through
   User.update(req.body, {
     individualHooks: true,

@@ -1,16 +1,4 @@
-<article class="post">
-  <div class="title">
-    <h1>{{post.title}}</h1>
-    <p>{{post.post_text}}</p>
-  </div>
-  <div class="meta">
-    by
-    {{post.user.username}}
-    on
-    {{post.created_at}}
-
-  </div>
-</article>
+{{> post-info post}}
 
 {{#if loggedIn}}
   <form class="comment-form">

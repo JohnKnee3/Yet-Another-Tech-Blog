@@ -19,26 +19,20 @@ router.get("/:id", (req, res) => {
     where: {
       id: req.params.id,
     },
-    // include: [
-    //   {
-    //     model: Post,
-    //     attributes: ["id", "title", "post_url", "created_at"],
-    //   },
-    //   {
-    //     model: Comment,
-    //     attributes: ["id", "comment_text", "created_at"],
-    //     include: {
-    //       model: Post,
-    //       attributes: ["title"],
-    //     },
-    //   },
-    //   {
-    //     model: Post,
-    //     attributes: ["title"],
-    //     through: Vote,
-    //     as: "voted_posts",
-    //   },
-    // ],
+    include: [
+      {
+        model: Post,
+        attributes: ["id", "title", "post_url", "created_at"],
+      },
+      {
+        model: Comment,
+        attributes: ["id", "comment_text", "created_at"],
+        include: {
+          model: Post,
+          attributes: ["title"],
+        },
+      },
+    ],
   })
     .then((dbUserData) => {
       if (!dbUserData) {
@@ -94,13 +88,13 @@ router.post("/login", (req, res) => {
       return;
     }
 
-    req.session.save(() => {
-      req.session.user_id = dbUserData.id;
-      req.session.username = dbUserData.username;
-      req.session.loggedIn = true;
+    // req.session.save(() => {
+    //   req.session.user_id = dbUserData.id;
+    //   req.session.username = dbUserData.username;
+    //   req.session.loggedIn = true;
 
-      res.json({ user: dbUserData, message: "You are now logged in!" });
-    });
+    res.json({ user: dbUserData, message: "You are now logged in!" });
+    // });
   });
 });
 

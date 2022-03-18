@@ -3,7 +3,7 @@
     <li>
       <article class="post">
         <div class="title">
-          <h1>{{title}}</h1>
+          <a href="/post/{{id}}">{{title}}</a>
           <p>{{post_text}}</p>
         </div>
         <div class="meta">
@@ -11,8 +11,7 @@
           {{user.username}}
           on
           {{created_at}}
-          |
-          <a href="/post/{{id}}">{{comments.length}} comment(s)</a>
+
         </div>
       </article>
     </li>

@@ -137,6 +137,10 @@ main {
   margin-bottom: 0;
 }
 
+.navi {
+  font-size: 1.5rem;
+}
+
 .post .title span {
   font-style: italic;
   font-size: 90%;
